@@ -93,6 +93,29 @@ consume el resto de la pipeline.
 Parámetros de chunking y `topK` por defecto en la sección `Rag` de configuración.
 El índice se crea/actualiza automáticamente en la primera ingesta.
 
+## Tools (function calling)
+
+Cada acción que el modelo puede ejecutar implementa `ITool` (`Name`,
+`Description`, `GetParameterSchema`, `ExecuteAsync`). El `IToolRegistry` agrega
+todas las tools registradas y resuelve las **habilitadas por tenant** según
+`SettingsJson` (`EnabledTools`: `null` = todas; lista = filtra; `[]` = ninguna).
+
+Tools del Módulo 1 (`Kurix.Tools`):
+
+| Tool | Acción | Depende de |
+|------|--------|------------|
+| `check_availability` | Consulta horarios en agenda | `ICalendarConnector` |
+| `create_booking`     | Crea una reserva            | `ICalendarConnector` |
+| `search_inventory`   | Busca en inventario         | `IInventoryConnector` |
+| `escalate_to_human`  | Deriva a humano (status + webhook) | `IEscalationService` |
+
+**Las integraciones nunca están hardcodeadas.** Las tools dependen de
+interfaces de conector (`ICalendarConnector`, `IInventoryConnector`) con
+implementaciones **mock** para la demo. Una integración real por cliente se
+agrega implementando esas interfaces y registrándola en el host — sin tocar las
+tools ni el motor. Agregar una capacidad nueva = implementar `ITool` y
+registrarla; el loop conversacional no cambia.
+
 ## Setup local
 
 ### Requisitos
@@ -159,7 +182,7 @@ dotnet run --project src/Kurix.Api      # Swagger en /swagger, health en /health
 - [x] **1. Estructura + DI + EF Core + migración inicial**
 - [x] **2. Multi-tenancy** (entidad `Tenant`, middleware de resolución por API key, `ITenantContext` scoped)
 - [x] **3. RAG** (`IKnowledgeService`, chunking por tokens, ingesta + hybrid search en Azure AI Search filtrado por `tenantId`)
-- [ ] 4. Patrón `ITool` + `IToolRegistry` + tools de ejemplo con conectores mock
+- [x] **4. Patrón `ITool`** + `IToolRegistry` + tools de ejemplo con conectores mock
 - [ ] 5. Motor conversacional (`IConversationService` con loop de tool calling)
 - [ ] 6. API endpoints + auth (API key + JWT dashboard)
 - [ ] 7. Widget JS embebible

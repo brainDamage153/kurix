@@ -1,11 +1,15 @@
 using Azure;
 using Azure.Search.Documents.Indexes;
+using Kurix.Core.Escalation;
 using Kurix.Core.Knowledge;
 using Kurix.Core.MultiTenancy;
+using Kurix.Core.Tools;
 using Kurix.Infrastructure.Configuration;
+using Kurix.Infrastructure.Escalation;
 using Kurix.Infrastructure.Knowledge;
 using Kurix.Infrastructure.MultiTenancy;
 using Kurix.Infrastructure.Persistence;
+using Kurix.Infrastructure.Tools;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,6 +57,12 @@ public static class DependencyInjection
         services.AddSingleton<ITextChunker, TokenTextChunker>();
         services.AddSingleton<IEmbeddingService, AzureOpenAIEmbeddingService>();
         services.AddSingleton<IKnowledgeService, AzureAISearchKnowledgeService>();
+
+        // Tools: the registry aggregates ITool implementations (registered by the
+        // Tools module) and the escalation service flips status + fires webhooks.
+        services.AddScoped<IToolRegistry, ToolRegistry>();
+        services.AddScoped<IEscalationService, EscalationService>();
+        services.AddHttpClient(EscalationService.HttpClientName);
 
         return services;
     }

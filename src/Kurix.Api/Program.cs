@@ -1,5 +1,6 @@
 using Kurix.Api.Middleware;
 using Kurix.Infrastructure;
+using Kurix.Tools;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,9 @@ builder.Services.AddSwaggerGen();
 
 // Infrastructure: EF Core (Azure SQL), options binding, external clients.
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Module 1 tools (with mock connectors) contributed to the tool registry.
+builder.Services.AddKurixTools();
 
 var app = builder.Build();
 
