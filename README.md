@@ -45,7 +45,7 @@ Kurix.slnx
 │   ├── Kurix.Infrastructure/  → EF Core, Azure OpenAI, Azure AI Search, repos
 │   └── Kurix.Tools/           → Implementaciones de ITool (acciones del Módulo 1)
 ├── widget/                    → Widget JS embebible (vanilla)
-├── dashboard/                 → Dashboard React + Vite         (milestone 8)
+├── dashboard/                 → Dashboard React + Vite
 └── tests/
     └── Kurix.Tests/           → Unit + integration tests
 ```
@@ -234,6 +234,6 @@ dotnet run --project src/Kurix.Api      # Swagger en /swagger, health en /health
 - [x] **5. Motor conversacional** (`IConversationService` con RAG + loop de tool calling)
 - [x] **6. API endpoints + auth** (API key widget + JWT dashboard)
 - [x] **7. Widget JS embebible** (vanilla, sin dependencias; ver [`widget/`](widget/))
-- [ ] 8. Dashboard React
+- [x] **8. Dashboard React + Vite** (login, conversaciones, métricas, conocimiento, configuración; ver [`dashboard/`](dashboard/))
 - [ ] 9. Tests (unit en `Core`, integration del flujo conversacional)
 ```
