@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Kurix.Api/Kurix.Api.csproj" />
+    <Project Path="src/Kurix.Core/Kurix.Core.csproj" />
+    <Project Path="src/Kurix.Infrastructure/Kurix.Infrastructure.csproj" />
+    <Project Path="src/Kurix.Tools/Kurix.Tools.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Kurix.Tests/Kurix.Tests.csproj" />
+  </Folder>
+</Solution>
