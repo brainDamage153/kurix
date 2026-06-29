@@ -76,6 +76,23 @@ consume el resto de la pipeline.
 - La API key se genera con 256 bits de entropía y prefijo `kx_`; solo se
   almacena su hash, nunca el valor en claro.
 
+## RAG (base de conocimiento)
+
+`IKnowledgeService` orquesta el flujo de Retrieval-Augmented Generation sobre un
+**único índice compartido** `kurix-knowledge` en Azure AI Search, **filtrado por
+`tenantId` en cada operación** (búsqueda y borrado):
+
+- **Ingesta** (`IngestAsync`): chunking por tokens (`cl100k_base`, el encoding de
+  `text-embedding-3-small`) con overlap configurable → embeddings (Azure OpenAI)
+  → indexado. Cada chunk se sella con su `tenantId`.
+- **Búsqueda** (`SearchAsync`): embebe la query y corre **hybrid search** (texto
+  + vector) filtrada por tenant; devuelve los chunks más relevantes con su score.
+- **Borrado** (`DeleteDocumentAsync`): elimina todos los chunks de un documento
+  fuente del tenant.
+
+Parámetros de chunking y `topK` por defecto en la sección `Rag` de configuración.
+El índice se crea/actualiza automáticamente en la primera ingesta.
+
 ## Setup local
 
 ### Requisitos
@@ -141,7 +158,7 @@ dotnet run --project src/Kurix.Api      # Swagger en /swagger, health en /health
 
 - [x] **1. Estructura + DI + EF Core + migración inicial**
 - [x] **2. Multi-tenancy** (entidad `Tenant`, middleware de resolución por API key, `ITenantContext` scoped)
-- [ ] 3. RAG (`IKnowledgeService`, ingesta + búsqueda en Azure AI Search)
+- [x] **3. RAG** (`IKnowledgeService`, chunking por tokens, ingesta + hybrid search en Azure AI Search filtrado por `tenantId`)
 - [ ] 4. Patrón `ITool` + `IToolRegistry` + tools de ejemplo con conectores mock
 - [ ] 5. Motor conversacional (`IConversationService` con loop de tool calling)
 - [ ] 6. API endpoints + auth (API key + JWT dashboard)
