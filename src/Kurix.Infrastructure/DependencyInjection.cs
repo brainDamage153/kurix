@@ -1,10 +1,12 @@
 using Azure;
 using Azure.Search.Documents.Indexes;
+using Kurix.Core.Conversations;
 using Kurix.Core.Escalation;
 using Kurix.Core.Knowledge;
 using Kurix.Core.MultiTenancy;
 using Kurix.Core.Tools;
 using Kurix.Infrastructure.Configuration;
+using Kurix.Infrastructure.Conversations;
 using Kurix.Infrastructure.Escalation;
 using Kurix.Infrastructure.Knowledge;
 using Kurix.Infrastructure.MultiTenancy;
@@ -34,6 +36,8 @@ public static class DependencyInjection
             configuration.GetSection(AzureAISearchOptions.SectionName));
         services.Configure<RagOptions>(
             configuration.GetSection(RagOptions.SectionName));
+        services.Configure<ConversationOptions>(
+            configuration.GetSection(ConversationOptions.SectionName));
 
         services.AddDbContext<KurixDbContext>(options =>
             options.UseSqlServer(
@@ -63,6 +67,11 @@ public static class DependencyInjection
         services.AddScoped<IToolRegistry, ToolRegistry>();
         services.AddScoped<IEscalationService, EscalationService>();
         services.AddHttpClient(EscalationService.HttpClientName);
+
+        // Conversation engine: chat model wrapper (singleton, thread-safe client)
+        // and the per-request orchestrator that runs the tool-calling loop.
+        services.AddSingleton<IChatCompletionService, AzureOpenAIChatCompletionService>();
+        services.AddScoped<IConversationService, ConversationService>();
 
         return services;
     }

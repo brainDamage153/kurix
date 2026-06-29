@@ -116,6 +116,30 @@ agrega implementando esas interfaces y registrándola en el host — sin tocar l
 tools ni el motor. Agregar una capacidad nueva = implementar `ITool` y
 registrarla; el loop conversacional no cambia.
 
+## Motor conversacional
+
+`IConversationService.ProcessMessageAsync(tenantId, conversationId, mensaje)`
+ejecuta un turno completo:
+
+1. Carga el historial de la conversación (SQL).
+2. **RAG**: recupera contexto relevante (`IKnowledgeService.SearchAsync`).
+3. Construye el system prompt: **persona** (de `SettingsJson`) + **contexto RAG**
+   + instrucciones de comportamiento y de cuándo escalar.
+4. Resuelve las **tools habilitadas** del tenant → function definitions.
+5. Llama a Azure OpenAI (`gpt-4o-mini`) con historial + tools.
+6. **Loop de tool calling** (máx. configurable, default 5): si el modelo invoca
+   una tool, se ejecuta vía `IToolRegistry`, se alimenta el resultado y se
+   re-llama.
+7. Escalado: el modelo decide usar `escalate_to_human` cuando no puede resolver
+   con confianza (instruido en el prompt).
+8. Persiste el turno (mensajes user/assistant/tool, tools usadas, tokens in/out)
+   y actualiza el estado de la conversación.
+9. Devuelve la respuesta, si escaló, tools usadas y tokens.
+
+Errores del modelo, timeouts y respuestas malformadas degradan a un mensaje de
+**fallback** sin romper la conversación. El loop está desacoplado del SDK vía
+`IChatCompletionService`, lo que permite testearlo con fakes (sin Azure).
+
 ## Setup local
 
 ### Requisitos
@@ -183,7 +207,7 @@ dotnet run --project src/Kurix.Api      # Swagger en /swagger, health en /health
 - [x] **2. Multi-tenancy** (entidad `Tenant`, middleware de resolución por API key, `ITenantContext` scoped)
 - [x] **3. RAG** (`IKnowledgeService`, chunking por tokens, ingesta + hybrid search en Azure AI Search filtrado por `tenantId`)
 - [x] **4. Patrón `ITool`** + `IToolRegistry` + tools de ejemplo con conectores mock
-- [ ] 5. Motor conversacional (`IConversationService` con loop de tool calling)
+- [x] **5. Motor conversacional** (`IConversationService` con RAG + loop de tool calling)
 - [ ] 6. API endpoints + auth (API key + JWT dashboard)
 - [ ] 7. Widget JS embebible
 - [ ] 8. Dashboard React

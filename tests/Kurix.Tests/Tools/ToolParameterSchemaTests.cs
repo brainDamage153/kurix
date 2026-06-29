@@ -33,11 +33,11 @@ public class ToolParameterSchemaTests
         Assert.Equal("integer", props.GetProperty("count").GetProperty("type").GetString());
 
         var enumValues = props.GetProperty("status").GetProperty("enum")
-            .EnumerateArray().Select(e => e.GetString()).ToArray();
+            .EnumerateArray().Select(e => e.GetString()!).ToArray();
         Assert.Equal(["open", "closed"], enumValues);
 
         var required = doc.RootElement.GetProperty("required")
-            .EnumerateArray().Select(e => e.GetString()).ToArray();
+            .EnumerateArray().Select(e => e.GetString()!).ToArray();
         Assert.Equal(["date"], required);
     }
 }
