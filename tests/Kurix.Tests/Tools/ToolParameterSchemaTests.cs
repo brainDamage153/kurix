@@ -12,7 +12,7 @@ public class ToolParameterSchemaTests
         using var doc = JsonDocument.Parse(json);
 
         Assert.Equal("object", doc.RootElement.GetProperty("type").GetString());
-        Assert.Equal(0, doc.RootElement.GetProperty("properties").EnumerateObject().Count());
+        Assert.Empty(doc.RootElement.GetProperty("properties").EnumerateObject());
         Assert.Equal(0, doc.RootElement.GetProperty("required").GetArrayLength());
     }
 

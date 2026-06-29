@@ -277,7 +277,7 @@ public class ConversationServiceTests
             Assert.Contains(sentMessages, m => m.Role == MessageRole.User && m.Content == "primer mensaje");
             Assert.Contains(sentMessages, m => m.Role == MessageRole.Assistant && m.Content == "Primera respuesta.");
             // Current message present exactly once and not duplicated by history.
-            Assert.Single(sentMessages.Where(m => m.Role == MessageRole.User && m.Content == "segundo mensaje"));
+            Assert.Single(sentMessages, m => m.Role == MessageRole.User && m.Content == "segundo mensaje");
         }
     }
 }

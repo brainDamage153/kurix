@@ -225,6 +225,18 @@ dotnet test  Kurix.slnx
 dotnet run --project src/Kurix.Api      # Swagger en /swagger, health en /health
 ```
 
+### Tests
+
+`dotnet test` corre la suite completa (50 tests, sin dependencias externas):
+
+- **Unit de dominio**: hashing de API keys, chunking por tokens, schema de tools,
+  registry (filtrado por tenant), ejecución de cada tool, settings de tenant.
+- **Motor conversacional**: loop de tool calling, escalado, límite de
+  iteraciones, fallback ante error y replay de historial (con fakes del LLM).
+- **Integration de la API** (`WebApplicationFactory` + EF InMemory + fakes de
+  chat/knowledge): chat con/sin API key, login JWT, gating de endpoints,
+  ingesta, métricas y settings.
+
 ## Estado de construcción (milestones)
 
 - [x] **1. Estructura + DI + EF Core + migración inicial**
@@ -235,5 +247,5 @@ dotnet run --project src/Kurix.Api      # Swagger en /swagger, health en /health
 - [x] **6. API endpoints + auth** (API key widget + JWT dashboard)
 - [x] **7. Widget JS embebible** (vanilla, sin dependencias; ver [`widget/`](widget/))
 - [x] **8. Dashboard React + Vite** (login, conversaciones, métricas, conocimiento, configuración; ver [`dashboard/`](dashboard/))
-- [ ] 9. Tests (unit en `Core`, integration del flujo conversacional)
+- [x] **9. Tests** (50 tests: unit de dominio + integration del flujo conversacional y de la API)
 ```
