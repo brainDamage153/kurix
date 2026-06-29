@@ -1,16 +1,22 @@
 using Azure;
 using Azure.Search.Documents.Indexes;
+using Kurix.Core.Auth;
 using Kurix.Core.Conversations;
 using Kurix.Core.Escalation;
 using Kurix.Core.Knowledge;
+using Kurix.Core.Metrics;
 using Kurix.Core.MultiTenancy;
+using Kurix.Core.Repositories;
 using Kurix.Core.Tools;
+using Kurix.Infrastructure.Auth;
 using Kurix.Infrastructure.Configuration;
 using Kurix.Infrastructure.Conversations;
 using Kurix.Infrastructure.Escalation;
 using Kurix.Infrastructure.Knowledge;
+using Kurix.Infrastructure.Metrics;
 using Kurix.Infrastructure.MultiTenancy;
 using Kurix.Infrastructure.Persistence;
+using Kurix.Infrastructure.Repositories;
 using Kurix.Infrastructure.Tools;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -38,6 +44,8 @@ public static class DependencyInjection
             configuration.GetSection(RagOptions.SectionName));
         services.Configure<ConversationOptions>(
             configuration.GetSection(ConversationOptions.SectionName));
+        services.Configure<JwtOptions>(
+            configuration.GetSection(JwtOptions.SectionName));
 
         services.AddDbContext<KurixDbContext>(options =>
             options.UseSqlServer(
@@ -72,6 +80,11 @@ public static class DependencyInjection
         // and the per-request orchestrator that runs the tool-calling loop.
         services.AddSingleton<IChatCompletionService, AzureOpenAIChatCompletionService>();
         services.AddScoped<IConversationService, ConversationService>();
+
+        // Dashboard support: password hashing, conversation reads and metrics.
+        services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
+        services.AddScoped<IConversationRepository, ConversationRepository>();
+        services.AddScoped<IMetricsService, MetricsService>();
 
         return services;
     }

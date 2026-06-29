@@ -140,6 +140,30 @@ Errores del modelo, timeouts y respuestas malformadas degradan a un mensaje de
 **fallback** sin romper la conversación. El loop está desacoplado del SDK vía
 `IChatCompletionService`, lo que permite testearlo con fakes (sin Azure).
 
+## API endpoints
+
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| POST | `/api/chat` | API key (`X-Api-Key`) | Mensaje del widget; crea/continúa la conversación por `sessionId`. |
+| POST | `/api/auth/login` | — | Login del dashboard (email + password) → JWT. |
+| POST | `/api/knowledge/documents` | JWT | Ingesta de un documento a la base de conocimiento. |
+| GET | `/api/knowledge/documents` | JWT | Lista los documentos del tenant. |
+| DELETE | `/api/knowledge/documents/{id}` | JWT | Elimina un documento (y sus chunks). |
+| GET | `/api/conversations` | JWT | Lista de conversaciones del tenant. |
+| GET | `/api/conversations/{id}` | JWT | Detalle con mensajes. |
+| GET | `/api/metrics` | JWT | Métricas agregadas (conversaciones, tasa de escalamiento, tokens, costo estimado, preguntas frecuentes). |
+| GET / PUT | `/api/tenant/settings` | JWT | Lee/actualiza persona y tools habilitadas. |
+| GET | `/health` | — | Liveness. |
+
+**Dos esquemas de auth conviven**: el widget usa **API key** (resuelta a tenant
+por el middleware) y el dashboard usa **JWT** (claim `tenant_id` que scopa cada
+query). Passwords del dashboard se hashean con **PBKDF2** (no con el hash de API
+keys). En `Development` un seeder crea un tenant demo e imprime la API key y las
+credenciales de login.
+
+> El streaming SSE en `/api/chat` queda como mejora futura: requiere completions
+> en streaming y complica el loop de tool calling; el MVP responde en JSON.
+
 ## Setup local
 
 ### Requisitos
@@ -208,7 +232,7 @@ dotnet run --project src/Kurix.Api      # Swagger en /swagger, health en /health
 - [x] **3. RAG** (`IKnowledgeService`, chunking por tokens, ingesta + hybrid search en Azure AI Search filtrado por `tenantId`)
 - [x] **4. Patrón `ITool`** + `IToolRegistry` + tools de ejemplo con conectores mock
 - [x] **5. Motor conversacional** (`IConversationService` con RAG + loop de tool calling)
-- [ ] 6. API endpoints + auth (API key + JWT dashboard)
+- [x] **6. API endpoints + auth** (API key widget + JWT dashboard)
 - [ ] 7. Widget JS embebible
 - [ ] 8. Dashboard React
 - [ ] 9. Tests (unit en `Core`, integration del flujo conversacional)
