@@ -63,6 +63,19 @@ Reglas de dependencia (estrictas): **`Core` no depende de `Infrastructure`**.
 | `KnowledgeDocument` | Id, TenantId, FileName, Status, ChunkCount, IngestedAt (solo metadata; chunks y vectores viven en Azure AI Search) |
 | `DashboardUser`     | Id, TenantId, Email, PasswordHash, Role |
 
+## Multi-tenancy
+
+Cada negocio es un `Tenant`. Las peticiones del widget envían la API key en el
+header **`X-Api-Key`**; el `TenantResolutionMiddleware` la hashea (SHA-256
+determinista), busca el tenant y lo deja en el `ITenantContext` (scoped) que
+consume el resto de la pipeline.
+
+- API key desconocida o tenant inactivo → `401`.
+- Sin header → la petición continúa sin tenant (las rutas del dashboard usan
+  JWT, milestone 6).
+- La API key se genera con 256 bits de entropía y prefijo `kx_`; solo se
+  almacena su hash, nunca el valor en claro.
+
 ## Setup local
 
 ### Requisitos
@@ -127,7 +140,7 @@ dotnet run --project src/Kurix.Api      # Swagger en /swagger, health en /health
 ## Estado de construcción (milestones)
 
 - [x] **1. Estructura + DI + EF Core + migración inicial**
-- [ ] 2. Multi-tenancy (entidad `Tenant`, middleware de resolución, `ITenantContext`)
+- [x] **2. Multi-tenancy** (entidad `Tenant`, middleware de resolución por API key, `ITenantContext` scoped)
 - [ ] 3. RAG (`IKnowledgeService`, ingesta + búsqueda en Azure AI Search)
 - [ ] 4. Patrón `ITool` + `IToolRegistry` + tools de ejemplo con conectores mock
 - [ ] 5. Motor conversacional (`IConversationService` con loop de tool calling)

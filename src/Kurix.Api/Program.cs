@@ -1,3 +1,4 @@
+using Kurix.Api.Middleware;
 using Kurix.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Resolve the tenant from the widget API key before hitting controllers.
+app.UseMiddleware<TenantResolutionMiddleware>();
+
 app.MapControllers();
 
 // Lightweight liveness endpoint.

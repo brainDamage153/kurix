@@ -1,4 +1,6 @@
+using Kurix.Core.MultiTenancy;
 using Kurix.Infrastructure.Configuration;
+using Kurix.Infrastructure.MultiTenancy;
 using Kurix.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +29,12 @@ public static class DependencyInjection
             options.UseSqlServer(
                 configuration.GetConnectionString("Sql"),
                 sql => sql.MigrationsAssembly(typeof(KurixDbContext).Assembly.FullName)));
+
+        // Multi-tenancy: deterministic API-key hashing, tenant lookups, and the
+        // request-scoped tenant context populated by the resolution middleware.
+        services.AddSingleton<IApiKeyHasher, Sha256ApiKeyHasher>();
+        services.AddScoped<ITenantRepository, TenantRepository>();
+        services.AddScoped<ITenantContext, TenantContext>();
 
         return services;
     }
